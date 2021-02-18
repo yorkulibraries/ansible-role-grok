@@ -2,7 +2,7 @@
 
 - name: Install Grok dependencies (apt)
   apt:
-    name: ["cmake", "libpng-dev", "libtiff-dev", "liblcms2-dev"]
+    name: ["cmake", "libpng-dev", "libtiff-dev", "liblcms2-dev", "libwebp-dev", "libzstd-dev"]
     update_cache: yes
     cache_valid_time: 600
   when: ansible_os_family == "Debian"
@@ -50,6 +50,18 @@
     chdir: "{{ grok_clone_directory }}/build"
     creates: /usr/local/bin/opj_decompress
   register: grok_make_install
+
+- name: Check if grk_decompress exists
+  stat:
+    path: /usr/local/bin/grk_decompress
+  register: grk_decompress
+
+- name: Symlink grk_decompress to opj_decompress
+  file:
+    src: /usr/local/bin/grk_decompress
+    dest: /usr/local/bin/opj_decompress
+    state: link
+  when: grk_decompress.stat.exists
 
 - name: Update ldconfig
   command: ldconfig
